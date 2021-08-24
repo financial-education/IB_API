@@ -1,0 +1,33 @@
+#+title: The Interactive Brokers API
+#+author: Matthew Brigida, Ph.D.
+#+email: mdbrigida@gmail.com
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+
+
+* Python
+
+
+
+* R
+
+
+#+begin_src R
+library(IBrokers)
+library(quantmod)
+
+tws <- twsConnect()# port = 4002) # default is the TWS, and 4002 is for the Gateway
+
+## Investigating 'Widowmaker' Natural Gas calendar spread
+
+ng.march <- twsFuture(symbol="NG",exch="NYMEX",expiry="202203")  # style: better to use '_' rather than '.'
+ng.march.secs <- reqHistoricalData(tws, ng.march, barSize="30 secs", duration="1 D")
+
+ng.april <- twsFuture(symbol="NG",exch="NYMEX",expiry="202204")
+ng.april.secs <- reqHistoricalData(tws, ng.april, barSize="30 secs", duration="1 D")
+
+data.secs <- merge.xts(ng.march.secs[,6], ng.april.secs[,6], join='inner')  # not a great practice to refer to the column number
+
+widowmaker.secs <- -data.secs[,2] + data.secs[,1]
+
+chartSeries(widowmaker.secs)
+#+end_src
